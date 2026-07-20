@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { RequireAuth, fmtMoney } from "@/components/AppShell";
-import { useCrm, calcBonus, STATUS_LABELS } from "@/lib/crm-store";
+import { useCrm, calcBonus, STATUS_LABELS, monthLabel } from "@/lib/crm-store";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const Route = createFileRoute("/desktop")({
   ssr: false,
@@ -11,104 +12,129 @@ export const Route = createFileRoute("/desktop")({
 });
 
 function Desktop() {
-  const { currentUser, visibleLeads, visiblePayments } = useCrm();
+  const { currentUser, visibleLeads, planFor, paymentsForMonth, state, availableMonths, setMonth } = useCrm();
+  const router = useRouter();
   if (!currentUser) return null;
+
+  const month = state.currentMonth;
+  const plan = planFor(currentUser.id, month);
+  const pays = paymentsForMonth(month, currentUser.name);
+  const net = pays.reduce((s, p) => s + (p.net || 0), 0);
+  const b = calcBonus(plan, net);
+
   const leads = visibleLeads();
-  const pays = visiblePayments();
-  const today = new Date().toISOString().slice(0, 10);
-  const todays = leads.filter((l) => l.date === today);
   const active = leads.filter((l) => l.status !== "paid" && l.status !== "closed");
 
-  const net = pays.reduce((s, p) => s + (p.net || 0), 0);
-  const b = calcBonus(currentUser, net);
+  const nextThreshold =
+    net < plan.minPlan ? { name: "План-минимум", target: plan.minPlan, mult: plan.minMultiplier } :
+    net < plan.targetPlan ? { name: "Целевой план", target: plan.targetPlan, mult: plan.targetMultiplier } :
+    net < plan.maxPlan ? { name: "Максимум", target: plan.maxPlan, mult: plan.maxMultiplier } : null;
 
-  const nextTarget = net < currentUser.minPlan ? currentUser.minPlan
-    : net < currentUser.targetPlan ? currentUser.targetPlan : null;
-  const toNext = nextTarget ? nextTarget - net : 0;
-  const minPct = Math.min(100, (net / currentUser.minPlan) * 100);
-  const tgtPct = Math.min(100, (net / currentUser.targetPlan) * 100);
+  const toNext = nextThreshold ? nextThreshold.target - net : 0;
+  const currentPct = nextThreshold ? Math.round((net / nextThreshold.target) * 100) : 100;
 
   return (
-    <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Рабочий стол — {currentUser.name}</h1>
-        <p className="text-sm text-muted-foreground">Ваша сводка на сегодня</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card className="p-5">
-          <div className="text-sm text-muted-foreground">Оклад</div>
-          <div className="text-2xl font-bold">{fmtMoney(currentUser.salary)}</div>
-        </Card>
-        <Card className="p-5">
-          <div className="text-sm text-muted-foreground">Премия сейчас</div>
-          <div className="text-2xl font-bold">{fmtMoney(b.bonus)}</div>
-          <div className="text-xs text-muted-foreground mt-1">
-            База {fmtMoney(b.base)} × {b.mult} ({b.tier})
-          </div>
-        </Card>
-        <Card className="p-5 bg-primary/5 border-primary/30">
-          <div className="text-sm text-muted-foreground">К выплате</div>
-          <div className="text-3xl font-bold text-primary">{fmtMoney(b.total)}</div>
-        </Card>
-      </div>
-
-      <Card className="p-5 mb-6">
-        <div className="font-semibold mb-4">Прогресс по плану</div>
-        <div className="space-y-4">
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>План-минимум · {fmtMoney(currentUser.minPlan)} · ×{currentUser.minMultiplier}</span>
-              <span className="font-medium">{fmtMoney(net)} / {Math.round(minPct)}%</span>
-            </div>
-            <Progress value={minPct} />
-          </div>
-          <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>План целевой · {fmtMoney(currentUser.targetPlan)} · ×{currentUser.targetMultiplier}</span>
-              <span className="font-medium">{fmtMoney(net)} / {Math.round(tgtPct)}%</span>
-            </div>
-            <Progress value={tgtPct} />
-          </div>
-          {nextTarget && (
-            <div className="text-sm text-muted-foreground">
-              До повышающего коэффициента осталось: <b className="text-foreground">{fmtMoney(toNext)}</b>
-            </div>
-          )}
-          {!nextTarget && (
-            <div className="text-sm text-primary font-semibold">🎉 Целевой план выполнен!</div>
-          )}
+    <div className="h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 shrink-0 flex-wrap gap-2">
+        <div>
+          <h1 className="text-2xl font-bold">Рабочий стол — {currentUser.name}</h1>
+          <p className="text-sm text-muted-foreground">Ваши показатели и заявки в работе</p>
         </div>
-      </Card>
+        <Select value={month} onValueChange={setMonth}>
+          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            {availableMonths.map((m) => <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>)}
+          </SelectContent>
+        </Select>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="p-5">
-          <div className="font-semibold mb-3">Заявки на сегодня ({todays.length})</div>
-          {todays.length === 0 && <div className="text-sm text-muted-foreground">Пока ничего</div>}
-          <div className="space-y-2">
-            {todays.map((l) => (
-              <div key={l.id} className="flex justify-between items-center p-2 rounded border text-sm">
-                <div>
-                  <div className="font-medium">{l.name}</div>
-                  <div className="text-xs text-muted-foreground line-clamp-1">{l.request}</div>
-                </div>
-                <Badge variant="secondary">{STATUS_LABELS[l.status]}</Badge>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+        {/* Bonus card — main focus */}
+        <Card className="p-5 lg:col-span-2 flex flex-col bg-gradient-to-br from-primary/5 to-primary/10 border-primary/30">
+          <div className="flex items-start justify-between mb-3">
+            <div>
+              <div className="text-sm text-muted-foreground">Ваша премия сейчас</div>
+              <div className="text-5xl font-bold text-primary mt-1">{fmtMoney(b.bonus)}</div>
+              <div className="text-sm mt-2">
+                <Badge variant={b.mult > 1 ? "default" : "secondary"}>{b.tier} · ×{b.mult}</Badge>
+                <span className="ml-2 text-muted-foreground">
+                  {plan.bonusRate}% × {fmtMoney(net)} × {b.mult}
+                </span>
               </div>
-            ))}
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-muted-foreground">К выплате всего</div>
+              <div className="text-2xl font-bold">{fmtMoney(b.total)}</div>
+              <div className="text-xs text-muted-foreground">оклад {fmtMoney(plan.salary)}</div>
+            </div>
+          </div>
+
+          <div className="flex-1 min-h-0 space-y-4 pt-2">
+            {nextThreshold ? (
+              <div>
+                <div className="flex justify-between text-sm mb-1">
+                  <span>До «{nextThreshold.name}» (×{nextThreshold.mult})</span>
+                  <span className="font-semibold">{fmtMoney(toNext)}</span>
+                </div>
+                <Progress value={currentPct} />
+                <div className="text-xs text-muted-foreground mt-1">
+                  {fmtMoney(net)} / {fmtMoney(nextThreshold.target)} · {currentPct}%
+                </div>
+              </div>
+            ) : (
+              <div className="text-primary font-semibold">🎉 Максимум выполнен!</div>
+            )}
+
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <PlanTier label="Мин" value={plan.minPlan} net={net} mult={plan.minMultiplier} />
+              <PlanTier label="Цель" value={plan.targetPlan} net={net} mult={plan.targetMultiplier} />
+              <PlanTier label="Макс" value={plan.maxPlan} net={net} mult={plan.maxMultiplier} />
+            </div>
           </div>
         </Card>
-        <Card className="p-5">
-          <div className="font-semibold mb-3">В работе ({active.length})</div>
-          <div className="space-y-2 max-h-80 overflow-y-auto">
-            {active.slice(0, 20).map((l) => (
-              <div key={l.id} className="flex justify-between items-center p-2 rounded border text-sm">
-                <div className="font-medium">{l.name}</div>
-                <Badge variant="outline">{STATUS_LABELS[l.status]}</Badge>
-              </div>
+
+        {/* Leads in work — clickable */}
+        <Card className="p-4 flex flex-col min-h-0">
+          <div className="flex items-center justify-between mb-3 shrink-0">
+            <div className="font-semibold">В работе ({active.length})</div>
+            <button
+              onClick={() => router.navigate({ to: "/kanban" })}
+              className="text-xs text-primary hover:underline"
+            >
+              Открыть доску →
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
+            {active.length === 0 && (
+              <div className="text-sm text-muted-foreground">Нет активных заявок</div>
+            )}
+            {active.map((l) => (
+              <button
+                key={l.id}
+                onClick={() => router.navigate({ to: "/kanban" })}
+                className="w-full text-left p-2 rounded border hover:border-primary hover:bg-accent/40 transition"
+              >
+                <div className="flex justify-between items-start gap-2">
+                  <div className="font-medium text-sm">{l.name}</div>
+                  <Badge variant="outline" className="text-[10px]">{STATUS_LABELS[l.status]}</Badge>
+                </div>
+                {l.tariff && <div className="text-xs text-muted-foreground mt-0.5">{l.tariff}</div>}
+                {l.request && <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{l.request}</div>}
+              </button>
             ))}
           </div>
         </Card>
       </div>
+    </div>
+  );
+}
+
+function PlanTier({ label, value, net, mult }: { label: string; value: number; net: number; mult: number }) {
+  const done = value > 0 && net >= value;
+  return (
+    <div className={`rounded-lg border p-2 ${done ? "bg-primary/10 border-primary/40" : "bg-background"}`}>
+      <div className="text-xs text-muted-foreground">{label} ×{mult}</div>
+      <div className={`text-sm font-semibold ${done ? "text-primary" : ""}`}>{fmtMoney(value)}</div>
     </div>
   );
 }
