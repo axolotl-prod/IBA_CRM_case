@@ -70,15 +70,20 @@ function Payments() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold">Оплаты</h1>
-          <p className="text-sm text-muted-foreground">
-            {currentUser?.role === "admin" ? "Все оплаты" : "Ваши оплаты"} · показано {filtered.length} из {all.length}
+      <div className="flex items-start sm:items-center justify-between gap-3 mb-4 shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">Оплаты</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+            {currentUser?.role === "admin" ? "Все оплаты" : "Ваши оплаты"} · {filtered.length} из {all.length}
           </p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" />Внести оплату</Button></DialogTrigger>
+          <DialogTrigger asChild>
+            <Button size="sm" className="shrink-0">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Внести оплату</span>
+            </Button>
+          </DialogTrigger>
           <NewPaymentDialog
             managers={managers}
             defaultManager={currentUser?.name || "Вася"}
@@ -87,18 +92,19 @@ function Payments() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 shrink-0">
         <StatCard icon={TrendingUp} label="Выручка" value={fmtMoney(totals.revenue)} />
         <StatCard icon={Wallet} label="Чистая прибыль" value={fmtMoney(totals.net)} />
         <StatCard icon={Users} label="Клиентов" value={String(totals.clients)} />
         <StatCard icon={TrendingUp} label="Средний чек" value={fmtMoney(totals.avg)} />
       </div>
 
+
       <div className="flex items-center gap-2 mb-3 shrink-0 flex-wrap">
-        <Input placeholder="Поиск..." value={q} onChange={(e) => setQ(e.target.value)} className="w-48" />
+        <Input placeholder="Поиск..." value={q} onChange={(e) => setQ(e.target.value)} className="w-full sm:w-48" />
         {currentUser?.role === "admin" && (
           <Select value={fManager} onValueChange={setFManager}>
-            <SelectTrigger className="w-40"><SelectValue placeholder="Менеджер" /></SelectTrigger>
+            <SelectTrigger className="w-[calc(50%-0.25rem)] sm:w-40"><SelectValue placeholder="Менеджер" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Все менеджеры</SelectItem>
               {managers.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -106,14 +112,14 @@ function Payments() {
           </Select>
         )}
         <Select value={fTariff} onValueChange={setFTariff}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Тариф" /></SelectTrigger>
+          <SelectTrigger className="w-[calc(50%-0.25rem)] sm:w-40"><SelectValue placeholder="Тариф" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Все тарифы</SelectItem>
             {tariffs.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={fMethod} onValueChange={setFMethod}>
-          <SelectTrigger className="w-40"><SelectValue placeholder="Способ оплаты" /></SelectTrigger>
+          <SelectTrigger className="w-[calc(50%-0.25rem)] sm:w-40"><SelectValue placeholder="Способ" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Все способы</SelectItem>
             {methods.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -126,8 +132,34 @@ function Payments() {
         )}
       </div>
 
+
       <Card className="flex-1 min-h-0 overflow-hidden flex flex-col p-0">
-        <div className="flex-1 min-h-0 overflow-auto">
+        {/* Mobile: card list */}
+        <div className="md:hidden flex-1 min-h-0 overflow-y-auto divide-y">
+          {filtered.map((p) => (
+            <div key={p.id} className="p-3">
+              <div className="flex justify-between items-start gap-2">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm truncate">{p.name}</div>
+                  <div className="text-xs text-muted-foreground truncate">{p.tariff}</div>
+                </div>
+                <div className="text-right shrink-0">
+                  <div className="font-semibold text-sm">{fmtMoney(p.revenue)}</div>
+                  <div className="text-xs text-muted-foreground">чист. {fmtMoney(p.net)}</div>
+                </div>
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>{p.payment} · {p.date}</span>
+                <span>{p.manager}</span>
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="p-6 text-center text-sm text-muted-foreground">Нет оплат</div>
+          )}
+        </div>
+        {/* Desktop: table */}
+        <div className="hidden md:block flex-1 min-h-0 overflow-auto">
           <Table>
             <TableHeader className="sticky top-0 bg-card z-10">
               <TableRow>
@@ -158,6 +190,7 @@ function Payments() {
           </Table>
         </div>
       </Card>
+
     </div>
   );
 }

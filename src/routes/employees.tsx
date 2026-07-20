@@ -86,42 +86,45 @@ function PlansTab() {
       </div>
 
       <Card className="p-0 overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Сотрудник</TableHead>
-              <TableHead className="text-right">Оклад</TableHead>
-              <TableHead className="text-right">Ставка %</TableHead>
-              <TableHead className="text-right">План мин</TableHead>
-              <TableHead className="text-right">План цель</TableHead>
-              <TableHead className="text-right">План макс</TableHead>
-              <TableHead className="text-right">×мин</TableHead>
-              <TableHead className="text-right">×цель</TableHead>
-              <TableHead className="text-right">×макс</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map(({ user, plan }) => (
-              <TableRow key={user.id}>
-                <TableCell className="font-medium">
-                  {user.name}
-                  <Badge variant="secondary" className="ml-2 text-[10px]">
-                    {user.role === "admin" ? "Рук" : "Мнг"}
-                  </Badge>
-                </TableCell>
-                <NumCell v={plan.salary} onChange={(x) => onField(user.id, "salary", x)} />
-                <NumCell v={plan.bonusRate} onChange={(x) => onField(user.id, "bonusRate", x)} step={0.5} />
-                <NumCell v={plan.minPlan} onChange={(x) => onField(user.id, "minPlan", x)} />
-                <NumCell v={plan.targetPlan} onChange={(x) => onField(user.id, "targetPlan", x)} />
-                <NumCell v={plan.maxPlan} onChange={(x) => onField(user.id, "maxPlan", x)} />
-                <NumCell v={plan.minMultiplier} onChange={(x) => onField(user.id, "minMultiplier", x)} step={0.1} />
-                <NumCell v={plan.targetMultiplier} onChange={(x) => onField(user.id, "targetMultiplier", x)} step={0.1} />
-                <NumCell v={plan.maxMultiplier} onChange={(x) => onField(user.id, "maxMultiplier", x)} step={0.1} />
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Сотрудник</TableHead>
+                <TableHead className="text-right">Оклад</TableHead>
+                <TableHead className="text-right">Ставка %</TableHead>
+                <TableHead className="text-right">План мин</TableHead>
+                <TableHead className="text-right">План цель</TableHead>
+                <TableHead className="text-right">План макс</TableHead>
+                <TableHead className="text-right">×мин</TableHead>
+                <TableHead className="text-right">×цель</TableHead>
+                <TableHead className="text-right">×макс</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {rows.map(({ user, plan }) => (
+                <TableRow key={user.id}>
+                  <TableCell className="font-medium whitespace-nowrap">
+                    {user.name}
+                    <Badge variant="secondary" className="ml-2 text-[10px]">
+                      {user.role === "admin" ? "Рук" : "Мнг"}
+                    </Badge>
+                  </TableCell>
+                  <NumCell v={plan.salary} onChange={(x) => onField(user.id, "salary", x)} />
+                  <NumCell v={plan.bonusRate} onChange={(x) => onField(user.id, "bonusRate", x)} step={0.5} />
+                  <NumCell v={plan.minPlan} onChange={(x) => onField(user.id, "minPlan", x)} />
+                  <NumCell v={plan.targetPlan} onChange={(x) => onField(user.id, "targetPlan", x)} />
+                  <NumCell v={plan.maxPlan} onChange={(x) => onField(user.id, "maxPlan", x)} />
+                  <NumCell v={plan.minMultiplier} onChange={(x) => onField(user.id, "minMultiplier", x)} step={0.1} />
+                  <NumCell v={plan.targetMultiplier} onChange={(x) => onField(user.id, "targetMultiplier", x)} step={0.1} />
+                  <NumCell v={plan.maxMultiplier} onChange={(x) => onField(user.id, "maxMultiplier", x)} step={0.1} />
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
+
     </div>
   );
 }

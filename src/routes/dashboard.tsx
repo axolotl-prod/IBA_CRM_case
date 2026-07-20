@@ -58,20 +58,21 @@ function Dashboard() {
   return (
     <div className="h-full overflow-y-auto pr-1">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Дашборд</h1>
-          <p className="text-sm text-muted-foreground">Сводка и планы менеджеров</p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">Дашборд</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Сводка и планы менеджеров</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Месяц:</span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">Месяц:</span>
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+            <SelectTrigger className="w-40 sm:w-48"><SelectValue /></SelectTrigger>
             <SelectContent>
               {availableMonths.map((m) => <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
         <Card className="p-4">
@@ -184,7 +185,7 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <div className="flex justify-between text-xs mb-1">
                       <span>Мин: {fmtMoney(m.plan.minPlan)}</span><span>{Math.round(minPct)}%</span>
@@ -198,6 +199,7 @@ function Dashboard() {
                     <Progress value={tgtPct} />
                   </div>
                 </div>
+
                 {toNext > 0 && (
                   <div className="text-xs text-muted-foreground mt-2">
                     До следующего уровня: {fmtMoney(toNext)}
