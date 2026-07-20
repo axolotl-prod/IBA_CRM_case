@@ -49,7 +49,7 @@ function Payments() {
           </DialogTrigger>
           <NewPaymentDialog
             managers={managers}
-            defaultManager={currentUser!.name}
+            defaultManager={currentUser?.name || "Вася"}
             onCreate={(p) => {
               addPayment(p);
               setOpen(false);
