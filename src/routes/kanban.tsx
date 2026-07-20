@@ -55,15 +55,20 @@ function Kanban() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold">Заявки</h1>
-          <p className="text-sm text-muted-foreground">
-            {currentUser?.role === "admin" ? "Все заявки" : "Ваши заявки"} · показано {filtered.length} из {leads.length}
+      <div className="flex items-start sm:items-center justify-between gap-3 mb-4 shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold">Заявки</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+            {currentUser?.role === "admin" ? "Все заявки" : "Ваши заявки"} · {filtered.length} из {leads.length}
           </p>
         </div>
         <Dialog open={openNew} onOpenChange={setOpenNew}>
-          <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" />Новая заявка</Button></DialogTrigger>
+          <DialogTrigger asChild>
+            <Button size="sm" className="shrink-0">
+              <Plus className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Новая заявка</span>
+            </Button>
+          </DialogTrigger>
           <NewLeadDialog
             managers={managers}
             defaultManager={currentUser!.name}
@@ -73,10 +78,10 @@ function Kanban() {
       </div>
 
       <div className="flex items-center gap-2 mb-4 shrink-0 flex-wrap">
-        <Input placeholder="Поиск..." value={q} onChange={(e) => setQ(e.target.value)} className="w-48" />
+        <Input placeholder="Поиск..." value={q} onChange={(e) => setQ(e.target.value)} className="w-full sm:w-48" />
         {currentUser?.role === "admin" && (
           <Select value={fManager} onValueChange={setFManager}>
-            <SelectTrigger className="w-44"><SelectValue placeholder="Менеджер" /></SelectTrigger>
+            <SelectTrigger className="w-[calc(50%-0.25rem)] sm:w-44"><SelectValue placeholder="Менеджер" /></SelectTrigger>
             <SelectContent>
               <SelectItem value={ALL}>Все менеджеры</SelectItem>
               {managers.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
@@ -84,7 +89,7 @@ function Kanban() {
           </Select>
         )}
         <Select value={fTariff} onValueChange={setFTariff}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Тариф" /></SelectTrigger>
+          <SelectTrigger className="w-[calc(50%-0.25rem)] sm:w-44"><SelectValue placeholder="Тариф" /></SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Все тарифы</SelectItem>
             {tariffs.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
@@ -97,17 +102,19 @@ function Kanban() {
         )}
       </div>
 
-      <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-5 gap-3">
+      <div className="flex-1 min-h-0 flex md:grid md:grid-cols-5 gap-3 overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none">
+
         {STATUS_ORDER.map((status) => {
           const col = filtered.filter((l) => l.status === status);
           const sum = col.reduce((s, l) => s + (l.sum || 0), 0);
           return (
             <div
               key={status}
-              className="bg-muted/40 rounded-lg flex flex-col min-h-0 overflow-hidden"
+              className="bg-muted/40 rounded-lg flex flex-col min-h-0 overflow-hidden shrink-0 w-[85%] sm:w-72 md:w-auto snap-start"
               onDragOver={(e) => e.preventDefault()}
               onDrop={() => onDrop(status)}
             >
+
               <div className="p-3 shrink-0 border-b bg-muted/60">
                 <div className="flex items-center justify-between">
                   <div className="font-semibold text-sm">{STATUS_LABELS[status]}</div>
