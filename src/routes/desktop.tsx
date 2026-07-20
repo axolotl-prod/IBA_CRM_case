@@ -34,40 +34,41 @@ function Desktop() {
   const currentPct = nextThreshold ? Math.round((net / nextThreshold.target) * 100) : 100;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col overflow-y-auto lg:overflow-hidden">
       <div className="flex items-center justify-between mb-4 shrink-0 flex-wrap gap-2">
-        <div>
-          <h1 className="text-2xl font-bold">Рабочий стол — {currentUser.name}</h1>
-          <p className="text-sm text-muted-foreground">Ваши показатели и заявки в работе</p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">Рабочий стол — {currentUser.name}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Ваши показатели и заявки в работе</p>
         </div>
         <Select value={month} onValueChange={setMonth}>
-          <SelectTrigger className="w-48"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-40 sm:w-48"><SelectValue /></SelectTrigger>
           <SelectContent>
             {availableMonths.map((m) => <SelectItem key={m} value={m}>{monthLabel(m)}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:flex-1 lg:min-h-0">
         {/* Bonus card — main focus */}
-        <Card className="p-5 lg:col-span-2 flex flex-col bg-gradient-to-br from-primary/5 to-primary/10 border-primary/30">
-          <div className="flex items-start justify-between mb-3">
-            <div>
+        <Card className="p-4 sm:p-5 lg:col-span-2 flex flex-col bg-gradient-to-br from-primary/5 to-primary/10 border-primary/30">
+          <div className="flex items-start justify-between gap-3 mb-3 flex-wrap">
+            <div className="min-w-0">
               <div className="text-sm text-muted-foreground">Ваша премия сейчас</div>
-              <div className="text-5xl font-bold text-primary mt-1">{fmtMoney(b.bonus)}</div>
-              <div className="text-sm mt-2">
+              <div className="text-4xl sm:text-5xl font-bold text-primary mt-1 break-all">{fmtMoney(b.bonus)}</div>
+              <div className="text-xs sm:text-sm mt-2">
                 <Badge variant={b.mult > 1 ? "default" : "secondary"}>{b.tier} · ×{b.mult}</Badge>
                 <span className="ml-2 text-muted-foreground">
                   {plan.bonusRate}% × {fmtMoney(net)} × {b.mult}
                 </span>
               </div>
             </div>
-            <div className="text-right">
+            <div className="text-right shrink-0">
               <div className="text-xs text-muted-foreground">К выплате всего</div>
-              <div className="text-2xl font-bold">{fmtMoney(b.total)}</div>
+              <div className="text-xl sm:text-2xl font-bold">{fmtMoney(b.total)}</div>
               <div className="text-xs text-muted-foreground">оклад {fmtMoney(plan.salary)}</div>
             </div>
           </div>
+
 
           <div className="flex-1 min-h-0 space-y-4 pt-2">
             {nextThreshold ? (
