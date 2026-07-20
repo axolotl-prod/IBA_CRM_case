@@ -50,7 +50,7 @@ function Payments() {
           <NewPaymentDialog
             managers={managers}
             defaultManager={currentUser?.name || "Вася"}
-            onCreate={(p) => {
+            onCreate={(p: any) => {
               addPayment(p);
               setOpen(false);
               toast.success("Оплата добавлена");
