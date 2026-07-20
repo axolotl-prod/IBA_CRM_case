@@ -7,10 +7,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CrmProvider } from "../lib/crm-store";
 import { Toaster } from "../components/ui/sonner";
 
@@ -36,9 +35,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -67,15 +63,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "FinanceCRM — CRM для отдела продаж" },
       { property: "og:description", content: "CRM-система: канбан заявок, оплаты, планы и премии менеджеров" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "FinanceCRM — CRM для отдела продаж" },
       { name: "twitter:description", content: "CRM-система: канбан заявок, оплаты, планы и премии менеджеров" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/660e1ce1-64f9-42ce-8501-4a950927f369/id-preview-9b7533bf--6fc837e2-ec3b-4789-b998-ea517595b765.lovable.app-1784562120846.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/660e1ce1-64f9-42ce-8501-4a950927f369/id-preview-9b7533bf--6fc837e2-ec3b-4789-b998-ea517595b765.lovable.app-1784562120846.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "icon", href: "/favicon.png", type: "image/png", sizes: "64x64" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
     ],
   }),
   shellComponent: RootShell,
