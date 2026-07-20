@@ -23,8 +23,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b bg-card sticky top-0 z-40">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <header className="border-b bg-card shrink-0 z-40">
         <div className="max-w-[1600px] mx-auto flex items-center gap-6 px-6 h-14">
           <div className="font-bold text-lg tracking-tight">
             Finance<span className="text-primary">CRM</span>
@@ -50,19 +50,17 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
             <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                logout();
-                router.navigate({ to: "/auth" });
-              }}
+              variant="ghost" size="icon"
+              onClick={() => { logout(); router.navigate({ to: "/auth" }); }}
             >
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
       </header>
-      <main className="max-w-[1600px] mx-auto p-6">{children}</main>
+      <main className="flex-1 min-h-0 overflow-hidden">
+        <div className="max-w-[1600px] mx-auto h-full p-6">{children}</div>
+      </main>
     </div>
   );
 }
@@ -71,17 +69,22 @@ export function RequireAuth({ children, admin = false }: { children: ReactNode; 
   const { currentUser } = useCrm();
   const router = useRouter();
   if (typeof window === "undefined") return null;
-  if (!currentUser) {
-    router.navigate({ to: "/auth" });
-    return null;
-  }
-  if (admin && currentUser.role !== "admin") {
-    router.navigate({ to: "/kanban" });
-    return null;
-  }
+  if (!currentUser) { router.navigate({ to: "/auth" }); return null; }
+  if (admin && currentUser.role !== "admin") { router.navigate({ to: "/kanban" }); return null; }
   return <AppShell>{children}</AppShell>;
 }
 
 export function fmtMoney(n: number) {
-  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(n || 0) + " ₽";
+  return new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 }).format(Math.round(n || 0)) + " ₽";
 }
+
+// Chart colors — plain hex so Recharts can render (project uses oklch tokens)
+export const CHART = {
+  primary: "#0f172a",
+  accent: "#3b82f6",
+  muted: "#94a3b8",
+  soft: "#cbd5e1",
+  good: "#16a34a",
+  warn: "#f59e0b",
+  bad: "#ef4444",
+};
