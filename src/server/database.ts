@@ -353,9 +353,9 @@ function visibleChatRows(userId: string): Row[] {
       COALESCE((SELECT l.id FROM lead_telegram_links ll JOIN leads l ON l.id=ll.lead_id WHERE ll.contact_id=co.id ORDER BY COALESCE(ll.linked_at,l.created_at) DESC LIMIT 1),'') lead_id,
       COALESCE((SELECT l.name FROM lead_telegram_links ll JOIN leads l ON l.id=ll.lead_id WHERE ll.contact_id=co.id ORDER BY COALESCE(ll.linked_at,l.created_at) DESC LIMIT 1),'') lead_name,
       COALESCE((SELECT l.tariff FROM lead_telegram_links ll JOIN leads l ON l.id=ll.lead_id WHERE ll.contact_id=co.id ORDER BY COALESCE(ll.linked_at,l.created_at) DESC LIMIT 1),'') tariff,
-      COALESCE((SELECT CASE WHEN m.message_type IN ('document','photo') THEN '📎 ' || m.file_name WHEN m.message_type='sticker' THEN 'Стикер ' || m.text ELSE m.text END FROM telegram_messages m WHERE m.chat_id=ch.id ORDER BY m.created_at DESC,m.id DESC LIMIT 1),'') last_message
+      COALESCE((SELECT CASE WHEN m.message_type IN ('document','photo') THEN '📎 ' || m.file_name WHEN m.message_type='sticker' THEN 'Стикер ' || m.text ELSE m.text END FROM telegram_messages m WHERE m.chat_id=ch.id ORDER BY unixepoch(m.created_at) DESC,COALESCE(CAST(NULLIF(m.telegram_message_id,'') AS INTEGER),0) DESC,m.rowid DESC LIMIT 1),'') last_message
     FROM telegram_chats ch JOIN telegram_contacts co ON co.id=ch.contact_id LEFT JOIN users u ON u.id=ch.manager_id
-    WHERE ?='admin' OR ch.manager_id=? ORDER BY ch.last_message_at DESC`).all(user.role, userId) as Row[];
+    WHERE ?='admin' OR ch.manager_id=? ORDER BY unixepoch(ch.last_message_at) DESC,ch.rowid DESC`).all(user.role, userId) as Row[];
 }
 
 export async function readTelegramChats(userId: string, selectedChatId = "", leadId = ""): Promise<TelegramChatsData> {
@@ -378,7 +378,7 @@ export async function readTelegramChats(userId: string, selectedChatId = "", lea
     const selected = chats.find((chat) => chat.id === selectedChatId);
     if (selected) selected.unreadCount = 0;
   } else if (selectedChatId) selectedChatId = "";
-  const messages = selectedChatId ? (db.prepare(`SELECT m.*,COALESCE(u.name,'') sender_name FROM telegram_messages m LEFT JOIN users u ON u.id=m.sender_user_id WHERE m.chat_id=? ORDER BY m.created_at,m.id`).all(selectedChatId) as Row[]).map((row): TelegramChatMessage => ({
+  const messages = selectedChatId ? (db.prepare(`SELECT m.*,COALESCE(u.name,'') sender_name FROM telegram_messages m LEFT JOIN users u ON u.id=m.sender_user_id WHERE m.chat_id=? ORDER BY unixepoch(m.created_at),COALESCE(CAST(NULLIF(m.telegram_message_id,'') AS INTEGER),9223372036854775807),m.rowid`).all(selectedChatId) as Row[]).map((row): TelegramChatMessage => ({
     id: String(row.id), chatId: String(row.chat_id), direction: row.direction as TelegramChatMessage["direction"], messageType: row.message_type as TelegramChatMessage["messageType"],
     text: String(row.text), senderName: String(row.sender_name), fileName: String(row.file_name), mimeType: String(row.mime_type), fileSize: Number(row.file_size),
     status: row.status as TelegramChatMessage["status"], error: String(row.error), createdAt: String(row.created_at),
