@@ -2,18 +2,30 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { useCrm } from "@/lib/crm-store";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
-import { LogOut, LayoutGrid, Wallet, BarChart3, Users, User as UserIcon, Menu } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { loadTelegramUnreadCount } from "@/lib/telegram-functions";
+import { LogOut, LayoutGrid, Wallet, BarChart3, Users, User as UserIcon, Menu, MessageCircle, ReceiptText } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { currentUser, logout } = useCrm();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [unreadChats, setUnreadChats] = useState(0);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    const refresh = () => void loadTelegramUnreadCount({ data: { userId: currentUser.id } }).then(setUnreadChats).catch(() => {});
+    refresh();
+    const interval = window.setInterval(refresh, 10_000);
+    return () => window.clearInterval(interval);
+  }, [currentUser?.id]);
 
   const nav =
     currentUser?.role === "admin"
       ? [
           { to: "/kanban", label: "Заявки", icon: LayoutGrid },
+          { to: "/chats", label: "Чаты", icon: MessageCircle },
+          { to: "/invoices", label: "Счета", icon: ReceiptText },
           { to: "/payments", label: "Оплаты", icon: Wallet },
           { to: "/dashboard", label: "Дашборд", icon: BarChart3 },
           { to: "/employees", label: "Сотрудники", icon: Users },
@@ -21,6 +33,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       : [
           { to: "/desktop", label: "Рабочий стол", icon: UserIcon },
           { to: "/kanban", label: "Мои заявки", icon: LayoutGrid },
+          { to: "/chats", label: "Мои чаты", icon: MessageCircle },
+          { to: "/invoices", label: "Мои счета", icon: ReceiptText },
           { to: "/payments", label: "Мои оплаты", icon: Wallet },
         ];
 
@@ -63,6 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     <n.icon className="w-4 h-4" />
                     {n.label}
+                    {n.to === "/chats" && unreadChats > 0 && <span className="ml-auto rounded-full bg-primary text-primary-foreground text-[10px] min-w-5 h-5 px-1 flex items-center justify-center">{unreadChats}</span>}
                   </Link>
                 ))}
                 <button
@@ -88,6 +103,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <n.icon className="w-4 h-4" />
                 {n.label}
+                {n.to === "/chats" && unreadChats > 0 && <span className="rounded-full bg-primary text-primary-foreground text-[10px] min-w-5 h-5 px-1 flex items-center justify-center">{unreadChats}</span>}
               </Link>
             ))}
           </nav>
@@ -112,11 +128,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 export function RequireAuth({ children, admin = false }: { children: ReactNode; admin?: boolean }) {
-  const { currentUser } = useCrm();
+  const { currentUser, loading } = useCrm();
   const router = useRouter();
+  useEffect(() => {
+    if (loading || typeof window === "undefined") return;
+    if (!currentUser) void router.navigate({ to: "/auth" });
+    else if (admin && currentUser.role !== "admin") void router.navigate({ to: "/kanban", search: {} });
+  }, [admin, currentUser, loading, router]);
   if (typeof window === "undefined") return null;
-  if (!currentUser) { router.navigate({ to: "/auth" }); return null; }
-  if (admin && currentUser.role !== "admin") { router.navigate({ to: "/kanban" }); return null; }
+  if (loading) return null;
+  if (!currentUser) return null;
+  if (admin && currentUser.role !== "admin") return null;
   return <AppShell>{children}</AppShell>;
 }
 

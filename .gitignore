@@ -1,5 +1,21 @@
+# Dependencies and build output
+node_modules/
+dist/
+dist-ssr/
+.output/
+.vinxi/
+.tanstack/
+.nitro/
+
+# Local configuration and Cloudflare state
+.env
+.env.local
+*.local
+.dev.vars
+.wrangler/
+
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,23 +23,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-.output
-.vinxi
-.tanstack/**
-.nitro
-*.local
+# Runtime data
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal
+data/*.tmp.json
+data/telegram-files/
+data/invoices/
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
-
-# Editor directories and files
+# Editor and operating-system files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*

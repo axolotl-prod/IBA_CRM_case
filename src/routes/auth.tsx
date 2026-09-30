@@ -25,9 +25,9 @@ function AuthPage() {
   const [loginStr, setLogin] = useState("admin");
   const [password, setPassword] = useState("admin123");
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(loginStr, password)) {
+    if (await login(loginStr, password)) {
       toast.success("Добро пожаловать!");
       router.navigate({ to: "/" });
     } else {

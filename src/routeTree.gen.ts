@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ChatsRouteImport } from './routes/chats'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DesktopRouteImport } from './routes/desktop'
 import { Route as EmployeesRouteImport } from './routes/employees'
+import { Route as InvoicesRouteImport } from './routes/invoices'
 import { Route as KanbanRouteImport } from './routes/kanban'
 import { Route as PaymentsRouteImport } from './routes/payments'
 
@@ -25,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatsRoute = ChatsRouteImport.update({
+  id: '/chats',
+  path: '/chats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -42,6 +49,11 @@ const EmployeesRoute = EmployeesRouteImport.update({
   path: '/employees',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InvoicesRoute = InvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KanbanRoute = KanbanRouteImport.update({
   id: '/kanban',
   path: '/kanban',
@@ -56,18 +68,22 @@ const PaymentsRoute = PaymentsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/dashboard': typeof DashboardRoute
   '/desktop': typeof DesktopRoute
   '/employees': typeof EmployeesRoute
+  '/invoices': typeof InvoicesRoute
   '/kanban': typeof KanbanRoute
   '/payments': typeof PaymentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/dashboard': typeof DashboardRoute
   '/desktop': typeof DesktopRoute
   '/employees': typeof EmployeesRoute
+  '/invoices': typeof InvoicesRoute
   '/kanban': typeof KanbanRoute
   '/payments': typeof PaymentsRoute
 }
@@ -75,9 +91,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/chats': typeof ChatsRoute
   '/dashboard': typeof DashboardRoute
   '/desktop': typeof DesktopRoute
   '/employees': typeof EmployeesRoute
+  '/invoices': typeof InvoicesRoute
   '/kanban': typeof KanbanRoute
   '/payments': typeof PaymentsRoute
 }
@@ -86,27 +104,33 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/chats'
     | '/dashboard'
     | '/desktop'
     | '/employees'
+    | '/invoices'
     | '/kanban'
     | '/payments'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/chats'
     | '/dashboard'
     | '/desktop'
     | '/employees'
+    | '/invoices'
     | '/kanban'
     | '/payments'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/chats'
     | '/dashboard'
     | '/desktop'
     | '/employees'
+    | '/invoices'
     | '/kanban'
     | '/payments'
   fileRoutesById: FileRoutesById
@@ -114,9 +138,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  ChatsRoute: typeof ChatsRoute
   DashboardRoute: typeof DashboardRoute
   DesktopRoute: typeof DesktopRoute
   EmployeesRoute: typeof EmployeesRoute
+  InvoicesRoute: typeof InvoicesRoute
   KanbanRoute: typeof KanbanRoute
   PaymentsRoute: typeof PaymentsRoute
 }
@@ -135,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chats': {
+      id: '/chats'
+      path: '/chats'
+      fullPath: '/chats'
+      preLoaderRoute: typeof ChatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -158,6 +191,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmployeesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invoices': {
+      id: '/invoices'
+      path: '/invoices'
+      fullPath: '/invoices'
+      preLoaderRoute: typeof InvoicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/kanban': {
       id: '/kanban'
       path: '/kanban'
@@ -178,9 +218,11 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  ChatsRoute: ChatsRoute,
   DashboardRoute: DashboardRoute,
   DesktopRoute: DesktopRoute,
   EmployeesRoute: EmployeesRoute,
+  InvoicesRoute: InvoicesRoute,
   KanbanRoute: KanbanRoute,
   PaymentsRoute: PaymentsRoute,
 }

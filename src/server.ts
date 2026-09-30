@@ -1,4 +1,6 @@
 import "./lib/error-capture";
+// Keeps Telegram long polling alive independently of an open CRM browser tab.
+import "./server/database";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";

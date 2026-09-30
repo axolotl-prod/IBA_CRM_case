@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useMemo } from "react";
 import { RequireAuth, fmtMoney } from "@/components/AppShell";
 import { useCrm } from "@/lib/crm-store";
+import { TARIFFS } from "@/lib/crm-types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -232,7 +233,7 @@ function StatCard({ icon: Icon, label, value }: any) {
 
 function NewPaymentDialog({ managers, defaultManager, onCreate }: any) {
   const [f, setF] = useState({
-    name: "", contact: "", tariff: "куратор",
+    name: "", contact: "", tariff: TARIFFS[0] as string,
     revenue: 0, net: 0, debt: 0, payment: "сразу",
     date: new Date().toISOString().slice(0, 10), manager: defaultManager, schedule: "",
   });
@@ -242,7 +243,12 @@ function NewPaymentDialog({ managers, defaultManager, onCreate }: any) {
       <div className="space-y-3">
         <F label="Клиент"><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></F>
         <F label="Контакт (тг/тел)"><Input value={f.contact} onChange={(e) => setF({ ...f, contact: e.target.value })} /></F>
-        <F label="Тариф"><Input value={f.tariff} onChange={(e) => setF({ ...f, tariff: e.target.value })} /></F>
+        <F label="Тариф">
+          <Select value={f.tariff} onValueChange={(value) => setF({ ...f, tariff: value })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>{TARIFFS.map((tariff) => <SelectItem key={tariff} value={tariff}>{tariff}</SelectItem>)}</SelectContent>
+          </Select>
+        </F>
         <div className="grid grid-cols-2 gap-3">
           <F label="Выручка"><Input type="number" value={f.revenue} onChange={(e) => setF({ ...f, revenue: +e.target.value, net: Math.round(+e.target.value * 0.85) })} /></F>
           <F label="Чистыми"><Input type="number" value={f.net} onChange={(e) => setF({ ...f, net: +e.target.value })} /></F>

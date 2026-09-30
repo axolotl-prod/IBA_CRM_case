@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "db:import:excel": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/parse-excel.ps1 -ExcelPath \"../Запуск январь-февраль.xlsx\" -OutputPath \"data/excel-import.tmp.json\" && node scripts/import-excel.mjs data/excel-import.tmp.json",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",

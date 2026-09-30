@@ -289,7 +289,7 @@ function EditDialog({ user, onSave }: { user: User; onSave: (u: User) => void })
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Fld label="Логин"><Input value={f.login} onChange={(e) => setF({ ...f, login: e.target.value })} /></Fld>
-          <Fld label="Пароль"><Input value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></Fld>
+          <Fld label={user.name ? "Новый пароль (необязательно)" : "Пароль"}><Input type="password" placeholder={user.name ? "Оставьте пустым без изменений" : ""} value={f.password} onChange={(e) => setF({ ...f, password: e.target.value })} /></Fld>
         </div>
         <div className="text-xs text-muted-foreground pt-2 border-t">
           Базовые значения (применяются к любому месяцу без переопределения):

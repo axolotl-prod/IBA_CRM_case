@@ -46,7 +46,8 @@ export default defineConfig(({ command }) => ({
       },
       server: { entry: "server" },
     }),
-    command === "build" && nitro({ defaultPreset: "cloudflare-module" }),
+    // SQLite is a local file, so production must run in a persistent Node process.
+    command === "build" && nitro({ defaultPreset: "node-server" }),
     react(),
   ],
 }));
